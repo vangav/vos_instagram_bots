@@ -1,0 +1,129 @@
+= **Keyspace: ig_bots** =
+Description: used for all bots-related vos_instagream tables
+===== Replications =====
+| **Name** | **Replication** | **Description**
+| dev | 'class': 'SimpleStrategy', 'replication_factor' : 1 | used for dev environment
+
+== Table: cities ==
+Description: stores cities in which bot users are created
+===== Columns =====
+| **Name** | **Type**
+| airport_code | varchar
+| latitude | double
+| longitude | double
+| continent | varchar
+| continent_code | varchar
+| country | varchar
+| country_code | varchar
+| city | varchar
+| population_in_millions | int
+| added_year_month_day | varchar
+`Partition Keys: airport_code`
+`Caching: ALL`
+
+===== Queries: =====
+
+**Query: insert**
+inserts a new city
+`INSERT INTO ig_bots.cities (airport_code, latitude, longitude, continent, continent_code, country, country_code, city, population_in_millions, added_year_month_day) VALUES (:airport_code, :latitude, :longitude, :continent, :continent_code, :country, :country_code, :city, :population_in_millions, :added_year_month_day);`
+**Query: select_city**
+selects one city's attributes
+`SELECT latitude, longitude, continent, continent_code, country, country_code, city, population_in_millions, added_year_month_day FROM ig_bots.cities WHERE airport_code = :airport_code;`
+**Query: select_all**
+selects all cities attributes
+`SELECT * from ig_bots.cities;`
+
+
+== Table: users_index ==
+Description: stores all bot users
+===== Columns =====
+| **Name** | **Type**
+| year_month_day | varchar
+| airport_code | varchar
+| seq_id | int
+| user_id | uuid
+| last_active_year_month_day | varchar
+`Partition Keys: year_month_day, airport_code, seq_id`
+`Caching: ALL`
+
+===== Queries: =====
+
+**Query: insert**
+inserts a new user
+`INSERT INTO ig_bots.users_index (year_month_day, airport_code, seq_id, user_id, last_active_year_month_day) VALUES (:year_month_day, :airport_code, :seq_id, :user_id, :last_active_year_month_day);`
+**Query: select_city**
+selects all user's in a city created on a specific day
+`SELECT user_id FROM ig_bots.users_index WHERE year_month_day = :year_month_day AND airport_code = :airport_code;`
+**Query: select_user**
+select a user's user id and last active date
+`SELECT user_id, last_active_year_month_day FROM ig_bots.users_index WHERE year_month_day = :year_month_day AND airport_code = :airport_code AND seq_id = :seq_id;`
+**Query: update_last_active_date**
+updates a user's last active_date
+`UPDATE ig_bots.users_index SET last_active_year_month_day = :last_active_year_month_day WHERE ear_month_day = :year_month_day AND airport_code = :airport_code AND seq_id = :seq_id;`
+
+
+== Table: users_count ==
+Description: stores the count of users created on a day in a city
+===== Columns =====
+| **Name** | **Type**
+| year_month_day_airport_code | varchar
+| users_count | counter
+`Partition Keys: year_month_day_airport_code`
+`Caching: ALL`
+
+===== Queries: =====
+
+**Query: increment**
+increments the count of users created on a day in a city
+`UPDATE ig_bots.users_count SET users_count = users_count + 1 WHERE year_month_day_airport_code = :year_month_day_airport_code;`
+**Query: increment_value**
+increments the count of users created on a day in a city by a value
+`UPDATE ig_bots.users_count SET users_count = users_count + :users_count WHERE year_month_day_airport_code = :year_month_day_airport_code;`
+**Query: select**
+selects the count of users created on a day in a city
+`SELECT users_count FROM ig_bots.users_count WHERE year_month_day_airport_code = :year_month_day_airport_code;`
+
+
+== Table: posts_index ==
+Description: stores all bot posts
+===== Columns =====
+| **Name** | **Type**
+| year_month_day | varchar
+| airport_code | varchar
+| seq_id | int
+| post_id | uuid
+`Partition Keys: year_month_day, airport_code, seq_id`
+`Caching: ALL`
+
+===== Queries: =====
+
+**Query: insert**
+inserts a new post
+`INSERT INTO ig_bots.posts_index (year_month_day, airport_code, seq_id, post_id) VALUES (:year_month_day, :airport_code, :seq_id, :post_id);`
+**Query: select_post**
+selects a post's id
+`SELECT post_id FROM ig_bots.posts_index WHERE year_month_day = :year_month_day AND airport_code = :airport_code AND seq_id = :seq_id;`
+
+
+== Table: posts_count ==
+Description: stores the count of posts created on a day in a city
+===== Columns =====
+| **Name** | **Type**
+| year_month_day_airport_code | varchar
+| posts_count | counter
+`Partition Keys: year_month_day_airport_code`
+`Caching: ALL`
+
+===== Queries: =====
+
+**Query: increment**
+increments the count of posts created on a day in a city
+`UPDATE ig_bots.posts_count SET posts_count = posts_count + 1 WHERE year_month_day_airport_code = :year_month_day_airport_code;`
+**Query: increment_value**
+increments the count of posts created on a day in a city by a value
+`UPDATE ig_bots.posts_count SET posts_count = posts_count + :posts_count WHERE year_month_day_airport_code = :year_month_day_airport_code;`
+**Query: select**
+selects the count of posts created on a day in a city
+`SELECT posts_count FROM ig_bots.posts_count WHERE year_month_day_airport_code = :year_month_day_airport_code;`
+
+
